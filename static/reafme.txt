@@ -1,0 +1,140 @@
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+import os
+import uuid
+import pymysql
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField, BooleanField
+from wtforms.validators import DataRequired, Email, Length, EqualTo, Regexp
+
+# Flask App Initialization
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/palgunn'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = 'your_secret_key_here'
+
+# Database Initialization
+db = SQLAlchemy(app)
+
+# User Model
+class UserSignup(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    reg_number = db.Column(db.String(50), unique=True, nullable=False)
+    phone = db.Column(db.String(15), nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+
+# Lecturer Model
+class LecturerAdmin(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    phone = db.Column(db.String(15), nullable=False)
+    profile_pic = db.Column(db.String(200), nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+
+# User Signup Form
+class SignupForm(FlaskForm):
+    full_name = StringField('Full Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    reg_number = StringField('Registration Number', validators=[DataRequired()])
+    phone = StringField('Phone Number', validators=[DataRequired(), Regexp(r'^[0-9]{10,15}$', message="Invalid phone number")])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=8), Regexp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$', message="Password must contain letters and numbers.")])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message="Passwords must match")])
+    agree_terms = BooleanField('Agree to Terms', validators=[DataRequired()])
+
+# Lecturer Signup Form
+class LecturerForm(FlaskForm):
+    full_name = StringField('Full Name', validators=[DataRequired()])
+    email = StringField('Email Address', validators=[DataRequired(), Email()])
+    phone = StringField('Phone Number', validators=[DataRequired(), Regexp(r'^[0-9]{10,15}$', message="Invalid phone number")])
+    profile_pic = FileField('Profile Picture', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=8), Regexp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$', message="Password must contain letters and numbers.")])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message="Passwords must match")])
+    agree_terms = BooleanField('Agree to Terms', validators=[DataRequired()])
+
+# Route for User Signup
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = SignupForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        full_name = form.full_name.data
+        email = form.email.data
+        reg_number = form.reg_number.data
+        phone = form.phone.data
+        password_hash = generate_password_hash(form.password.data)
+
+        existing_user = UserSignup.query.filter((UserSignup.email == email) | (UserSignup.reg_number == reg_number)).first()
+        if existing_user:
+            flash('Email or Registration Number already registered. Try logging in.', 'warning')
+            return render_template('signup.html', form=form)
+
+        new_user = UserSignup(full_name=full_name, email=email, reg_number=reg_number, phone=phone, password_hash=password_hash)
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            session['user_id'] = new_user.id
+            session['user_name'] = new_user.full_name
+            flash('Signup successful!', 'success')
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Database Error: {str(e)}", "danger")
+    return render_template('signup.html', form=form)
+
+# Route for Lecturer Signup
+@app.route('/lecturer_adminsignup', methods=['GET', 'POST'])
+def lecturer_signup():
+    form = LecturerForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        full_name = form.full_name.data
+        email = form.email.data
+        phone = form.phone.data
+        password_hash = generate_password_hash(form.password.data)
+
+        profile_pic = form.profile_pic.data
+        if profile_pic:
+            file_ext = os.path.splitext(profile_pic.filename)[1]
+            unique_filename = f"{uuid.uuid4()}{file_ext}"
+            upload_folder = os.path.join('static', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            profile_path = os.path.join(upload_folder, unique_filename)
+            profile_pic.save(profile_path)
+            profile_path_db = f'uploads/{unique_filename}'
+        else:
+            flash('Profile picture is required!', 'danger')
+            return render_template('lecturer_signup.html', form=form)
+
+        existing_lecturer = LecturerAdmin.query.filter_by(email=email).first()
+        if existing_lecturer:
+            flash('Email already registered. Try logging in.', 'warning')
+            return render_template('lecturer_signup.html', form=form)
+
+        new_lecturer = LecturerAdmin(full_name=full_name, email=email, phone=phone, profile_pic=profile_path_db, password_hash=password_hash)
+        try:
+            db.session.add(new_lecturer)
+            db.session.commit()
+            session['user_id'] = new_lecturer.id
+            session['user_name'] = new_lecturer.full_name
+            flash('Signup successful!', 'success')
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Database Error: {str(e)}", "danger")
+    return render_template('lecturer_signup.html', form=form)
+
+# Dashboard Route
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        flash('You need to log in first.', 'warning')
+        return redirect(url_for('signup'))
+    return render_template('dashboard.html', user_name=session.get('user_name'))
+
+# Run Flask App
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)

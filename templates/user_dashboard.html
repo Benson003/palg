@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border-radius: 10px;
+        }
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007bff;
+        }
+        .vote-btn {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-4">
+    <!-- User Profile Section -->
+    <div class="card p-4 mb-4 shadow-sm">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <img src="../static/profile.webp" alt="Profile Picture" class="profile-img">
+            </div>
+            <div class="col-md-10">
+                <h4>Welcome, {{ user.fullname }}</h4>
+                <p>Email: {{ user.email }}</p>
+                <p><strong>Status:</strong> {{ 'Voted' if has_voted else 'Not Voted' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Election Candidates Section -->
+    <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Election Candidates</h5>
+        <form action="{{ url_for('submit_vote') }}" method="POST">
+            <div class="row">
+                {% for candidate in candidates %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center p-3">
+                            <img src="{{ url_for('static', filename=candidate.image_url) }}" alt="Candidate Image" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
+                            <h6 class="mt-2">{{ candidate.name }}</h6>
+                            <p class="text-muted">{{ candidate.position }}</p>
+                            {% if not has_voted %}
+                                <input type="radio" name="vote" value="{{ candidate.reg_no }}">
+                            {% else %}
+                                <button class="btn btn-secondary vote-btn" disabled>Voted</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if not has_voted %}
+                <button type="submit" class="btn btn-primary mt-3">Submit Vote</button>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

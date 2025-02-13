@@ -1,0 +1,77 @@
+
+<!-- login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - PALG UNN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 400px; margin-top: 100px; }
+        .card { padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+
+            <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+                <h2>Admin Login</h2>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            
+                <div class="mb-3">
+                    <label class="form-label">Email or Phone Number</label>
+                    <input type="text" id="email_phone" name="email_phone" class="form-control" placeholder="Enter email or phone number" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required minlength="6">
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+            
+            
+            <script>
+            function validateForm() {
+                let emailPhone = document.getElementById("email_phone").value;
+                let password = document.getElementById("password").value;
+                let emailPhoneError = document.getElementById("emailPhoneError");
+                let passwordError = document.getElementById("passwordError");
+                
+                emailPhoneError.textContent = "";
+                passwordError.textContent = "";
+            
+                // Validate email or phone format
+                let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                let phonePattern = /^\d{10,14}$/;
+                
+                if (!emailPattern.test(emailPhone) && !phonePattern.test(emailPhone)) {
+                    emailPhoneError.textContent = "Enter a valid email or phone number";
+                    return false;
+                }
+            
+                // Validate password length
+                if (password.length < 6) {
+                    passwordError.textContent = "Password must be at least 6 characters";
+                    return false;
+                }
+            
+                return true;
+            }
+            </script>
+            <p class="text-center mt-3">Don't have an account? <a href="signup.html">Signup</a></p>
+        </div>
+    </div>
+</body>
+</html>
