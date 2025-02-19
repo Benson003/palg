@@ -1,0 +1,62 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+env/
+venv/
+
+# Instance folder (contains config, databases, etc.)
+instance/
+
+# SQLite database
+*.sqlite3
+*.db
+
+# Flask/Django secret keys
+app.key
+
+# Logs
+*.log
+server.log
+
+# Compiled C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Pytest cache
+.pytest_cache/
+
+# IDE/editor specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# MacOS system files
+.DS_Store
+
+# Routes & models compiled files
+models/__pycache__/
+routes/__pycache__/
+app/__pycache__/
+migrations/

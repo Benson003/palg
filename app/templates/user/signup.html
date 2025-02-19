@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Student Sign Up{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-lg p-4 bg-dark text-light" style="width: 100%; max-width: 400px; border-radius: 12px;">
+        <h2 class="text-center mb-4">Student Sign Up</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="fullname" class="form-label">Full Name</label>
+                <input type="text" id="fullname" name="fullname" class="form-control bg-secondary text-light border-0" required>
+            </div>
+            <div class="mb-3">
+                <label for="reg_number" class="form-label">Registration Number</label>
+                <input type="text" id="reg_number" name="reg_number" class="form-control bg-secondary text-light border-0" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email" class="form-control bg-secondary text-light border-0" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-control bg-secondary text-light border-0" required>
+            </div>
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control bg-secondary text-light border-0" required>
+                <div id="passwordError" class="text-danger mt-2" style="display: none;">Passwords do not match!</div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" id="submitBtn" disabled>Sign Up</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const password = document.getElementById("password");
+        const confirmPassword = document.getElementById("confirm_password");
+        const errorText = document.getElementById("passwordError");
+        const submitBtn = document.getElementById("submitBtn");
+
+        function validatePassword() {
+            if (password.value === confirmPassword.value && password.value !== "") {
+                errorText.style.display = "none";
+                submitBtn.disabled = false;
+            } else {
+                errorText.style.display = "block";
+                submitBtn.disabled = true;
+            }
+        }
+
+        password.addEventListener("input", validatePassword);
+        confirmPassword.addEventListener("input", validatePassword);
+    });
+</script>
+{% endblock %}

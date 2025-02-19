@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Student Login{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-dark">
+    <div class="card shadow-lg p-4 rounded border-0" style="max-width: 400px; width: 90%; background-color: #222; color: #fff;">
+        <h3 class="text-center mb-3">Student Login</h3>
+
+        <form method="POST">
+            <div class="mb-3">
+                <label for="reg_number" class="form-label">Registration Number</label>
+                <input type="text" class="form-control bg-dark text-light border-secondary" id="reg_number" name="reg_number" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control bg-dark text-light border-secondary" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

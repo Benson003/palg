@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Voting Website{% endblock %}</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <!-- Custom Dark Theme Styles -->
+    <style>
+        :root {
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #ffffff;
+            --secondary-text: #b3b3b3;
+            --primary-color: #0d6efd;
+            --border-color: #333;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand, .nav-link {
+            color: var(--text-color) !important;
+            transition: 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        /* Container */
+        .container {
+            margin-top: 40px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-background);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Flash Messages */
+        .alert {
+            background-color: var(--card-background);
+            border-color: var(--border-color);
+            color: var(--text-color);
+            transition: 0.4s ease-in-out;
+        }
+
+        .alert button {
+            color: var(--text-color);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 15px 0;
+            background-color: var(--card-background);
+            color: var(--secondary-text);
+            margin-top: 40px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .card {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            footer {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Voting Website</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                   {% if {{ session["isAdmin"]}} %}
+                            {% if session["email"] %}
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('index')}}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_links',link_type = "logout")}}">Logout</a></li>
+                            {% block link %}{% endblock %}
+                        {% else %}
+
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('index')}}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_links', link_type = "signup")}}">SignUp</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_links', link_type = "login")}}">Login</a></li>
+
+                        {% endif %}
+
+                   {% else %}
+                                {% if session["email"] %}
+                                <li class="nav-item"><a class="nav-link" href="{{ url_for('index')}}">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{{ url_for('user_links',link_type = "logout")}}">Logout</a></li>
+                                {% block link %}{% endblock %}
+                            {% else %}
+
+                                <li class="nav-item"><a class="nav-link" href="{{ url_for('index')}}">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{{ url_for('user_links', link_type = "signup")}}">SignUp</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{{ url_for('user_links', link_type = "login")}}">Login</a></li>
+
+                            {% endif %}
+
+
+
+                   {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        <div class="container mt-3">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Page Content -->
+    <div class="container">
+        <div class="card">
+            {% block content %} {% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Benzon Concepts. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
