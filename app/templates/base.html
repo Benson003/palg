@@ -116,11 +116,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                   {% if {{ session["isAdmin"]}} %}
-                            {% if session["email"] %}
+                   {% if  session["isAdmin"] == True %}
+                        {% if session["email"] != None %}
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('index')}}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for("admin_base")}}">Dashboard</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_links',link_type = "logout")}}">Logout</a></li>
-                            {% block link %}{% endblock %}
                         {% else %}
 
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('index')}}">Home</a></li>
@@ -130,10 +130,11 @@
                         {% endif %}
 
                    {% else %}
-                                {% if session["email"] %}
+                            {% if session["email"] %}
                                 <li class="nav-item"><a class="nav-link" href="{{ url_for('index')}}">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{{ url_for("user_base")}}">Dashboard</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ url_for('user_links',link_type = "logout")}}">Logout</a></li>
-                                {% block link %}{% endblock %}
+
                             {% else %}
 
                                 <li class="nav-item"><a class="nav-link" href="{{ url_for('index')}}">Home</a></li>

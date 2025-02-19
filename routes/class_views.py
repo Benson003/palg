@@ -29,6 +29,9 @@ class Admin(MethodView):
         link_type = link_type.strip().lower().rstrip("/") if link_type else None
         template = templates.get(link_type)
 
+        if link_type == "logout":
+            self.logout()
+
         return render_template(template) if template else abort(404)
 
     def post(self,link_type):
@@ -82,7 +85,7 @@ class Admin(MethodView):
 
     def logout(self):
         session.clear()
-        return redirect(url_for("admin_links",link_type="logout" ))
+        return redirect(url_for("admin_base"))
 
 
 
@@ -93,6 +96,8 @@ class User(MethodView):
         templates = user_templates
         link_type = link_type.strip().lower().rstrip("/") if link_type else None
         template = templates.get(link_type)
+        if link_type == "logout":
+            self.logout()
 
         return render_template(template) if template else abort(404)
 
@@ -103,6 +108,7 @@ class User(MethodView):
         handlers = {
             "login": self.login,
             "signup":self.signup,
+            "logout":self.logout,
             }
         handler = handlers.get(link_type, lambda *args: abort(404))
         return handler(form_data)
@@ -136,6 +142,6 @@ class User(MethodView):
             )
             return redirect(url_for("user_links",link_type = "login"))
 
-        def logout(self):
-            session.clear()
-            return redirect(url_for("user_links",link_type="logout" ))
+    def logout(self):
+        session.clear()
+        return redirect(url_for("user_base"))
