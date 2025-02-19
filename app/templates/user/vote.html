@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}PALG UNN Voting{% endblock %}
+
+{% block content %}
+{% if voter.hasVoted  != true %}
+            <div class="container mt-4">
+                <h1 class="text-center fw-bold mb-4 text-light">PALG UNN Voting</h1>
+
+                <form method="POST">
+
+
+                    {% set positions = [] %}
+                    {% for candidate in candidates %}
+                        {% if candidate.position not in positions %}
+                            {% set _ = positions.append(candidate.position) %}
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Loop through all positions and create separate rows -->
+                    {% for position in positions %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card bg-dark text-white shadow-sm p-4">
+                                <h3 class="text-center text-light">{{ position }}</h3>
+                                <div class="row">
+                                    {% for candidate in candidates if candidate.position == position %}
+                                    <div class="col-md-4 col-lg-3">
+                                        <label class="list-group-item bg-secondary text-white border-light p-3 d-flex flex-column align-items-center">
+                                            <input class="form-check-input mb-2" type="radio" name="vote_{{ position }}"
+                                                id="candidate_{{ candidate.reg_number }}" value="{{ candidate.reg_number }}" required>
+                                            <strong>{{ candidate.full_name }}</strong>
+                                            <small class="text-light">({{ candidate.reg_number }})</small>
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Submit Votes</button>
+                </form>
+            </div>
+  {% else %}
+                <style>
+                    body {
+                        background-color: #121212;
+                        color: white;
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                    }
+                    .table-container {
+                        width: 80%;
+                        margin: 20px auto;
+                        background: #1e1e1e;
+                        padding: 20px;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 10px;
+                    }
+                    th, td {
+                        padding: 12px;
+                        border: 1px solid white;
+                        text-align: left;
+                    }
+                    th {
+                        background-color: #0d6efd;
+                    }
+                    h2 {
+                        color: #0d6efd;
+                    }
+                </style>
+
+
+
+                <h1 class="text-white">Voting Results</h1>
+
+                {% set grouped_candidates = {} %}
+                {% for candidate in candidates %}
+                    {% set _ = grouped_candidates.setdefault(candidate.position, []).append(candidate) %}
+                {% endfor %}
+
+                {% for position, contenders in grouped_candidates.items() %}
+                    <div class="table-container">
+                        <h2>{{ position }}</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Registration Number</th>
+                                    <th>Votes</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-white">
+                                {% for candidate in contenders %}
+                                    <tr>
+                                        <td>{{ candidate.full_name }}</td>
+                                        <td>{{ candidate.reg_number }}</td>
+                                        <td>{{ candidate.votes }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                    <script>
+                        function fetchVotes() {
+                            $.getJSON("/votes", function(data) {
+                                data.forEach(candidate => {
+                                    let row = $(`tr[data-reg="${candidate.reg_number}"]`);
+                                    if (row.length) {
+                                        row.find(".votes").text(candidate.votes);
+                                    }
+                                });
+                            });
+                        }
+
+                        setInterval(fetchVotes, 10000);
+                    </script>
+
+{% endfor %}
+
+
+
+{% endif %}
+{% endblock %}

@@ -1,6 +1,7 @@
 from models import models
 from app import db
 import bcrypt
+from flask import flash
 
 def verify_password(plain_password, hashed_password):
 
@@ -34,7 +35,9 @@ class User:
         try:
             db.session.add(new_user)
             db.session.commit()
+            flash("User added sucessfully")
         except Exception as e:
+            flash(f"Something went wrong {e}",category="error")
             db.session.rollback()
 
 class Admin:
@@ -55,12 +58,14 @@ class Admin:
         try:
             db.session.add(new_admin)
             db.session.commit()
+            flash("Admin has been created")
         except Exception as e:
+            flash(f"Something went wrong {e}",category="error")
             db.session.rollback()
 
 
 class Dues:
-    def get_all_admin(self):
+    def get_all_dues(self):
         return models.Dues.query.all()
 
     def get_specfic_dues(self,reg_number):
@@ -75,27 +80,30 @@ class Dues:
         try:
             db.session.add(new_dues)
             db.session.commit()
+            flash("Database has been succesfully updated")
         except Exception as e:
+            flash("Something has goe wrong",category="error")
             db.session.rollback()
 
 class ElectoralCandidates:
-    def get_all_admin(self):
+    def get_all_candidates(self):
         return models.ElectoralCandidates.query.all()
 
-    def get_specfic_dues(self,reg_number):
+    def get_specfic_candidates(self,reg_number):
         due= models.ElectoralCandidates.query.filter(models.ElectoralCandidates.reg_number == reg_number).first()
         return due
 
-    def add_electoral_candidates(self,full_name,password,reg_number,postion):
+    def add_electoral_candidates(self,full_name,reg_number,position):
         new_dues = models.ElectoralCandidates(
             full_name = full_name,
-            password = password,
             reg_number = reg_number,
-            postion = postion,
+            position = position,
         )
         try:
             db.session.add(new_dues)
             db.session.commit()
+            flash("Candidate Added Sucessfully")
         except Exception as e:
+            flash("Something went wrong",category="error")
             print("f{e}")
             db.session.rollback()

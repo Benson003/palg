@@ -5,7 +5,6 @@ from app import session
 def register_routes(app):
     @app.route("/",methods=["GET"])
     def index():
-        session.clear()
         return render_template("user/index.html")
 
     app.add_url_rule("/user/",view_func=cl.User.as_view('user_base'))

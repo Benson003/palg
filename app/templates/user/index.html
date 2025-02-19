@@ -1,9 +1,30 @@
 {% extends "base.html" %}
-{% block title %}PALG UNN Voting{% endblock %}
 
+{% block title %}Voting Page{% endblock %}
 
 {% block content %}
 
-<h1>PALG UNN</h1>
+{% if session["reg_number"] %}
+            <div class="container mt-5">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h3 class="card-title text-white">Hello, {{ session["fullname"]}}!</h3>
+                        <p class="card-text text-white">You're logged in with Reg. No: <strong>{{ session["reg_number"] }}</strong></p>
 
+                        <a href="{{ url_for('user_links',link_type = "vote") }}" class="btn btn-primary">Go to Voting Page</a>
+                    </div>
+                </div>
+            </div>
+           {% else %}
+        <div class="container d-flex justify-content-center align-items-center min-vh-100">
+            <div class="card text-bg-dark text-center p-4 shadow-lg">
+                <h1 class="fw-bold">PALG UNN Voting</h1>
+                <p class="lead">
+                    A fair, secure, and transparent platform to cast your vote.
+                    Your voice matters—make it count!
+                </p>
+                <a href="{{ url_for("user_links",link_type="signup")}}" class="btn btn-primary btn-lg">Get Started</a>
+            </div>
+        </div>
+        {% endif %}
 {% endblock %}
