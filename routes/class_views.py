@@ -15,7 +15,7 @@ positions = ["President", "Vice President", "Secretary", "Treasurer"]
 
 admin_templates =  {
             None:"admin/index.html",
-            **{t: f"admin/{t}.html" for t in ["login","signup","logout","student_dues","add_contenstants"]}
+            **{t: f"admin/{t}.html" for t in ["login","signup","logout","student_dues","add_contenstants","results"]}
         }
 
 user_templates = {
@@ -25,17 +25,23 @@ user_templates = {
 
 
 class Admin(MethodView):
-    def get(self,link_type = None):
+    def get(self, link_type=None):
+        candidates = dl.ElectoralCandidates().get_all_candidates()
+        if link_type:
+            link_type = link_type.strip().lower().rstrip("/")
 
         templates = admin_templates
-        link_type = link_type.strip().lower().rstrip("/") if link_type else None
         template = templates.get(link_type)
 
+        if link_type == "clear_polls":
+            self.clear_polls()
+            return redirect(url_for("admin_base"))
 
         if link_type == "logout":
             self.logout()
 
-        return render_template(template,positions=positions) if template else abort(404)
+        return render_template(template, positions=positions ,candidates = candidates) if template else abort(404)
+
 
     def post(self,link_type):
         link_type = link_type.strip().lower().rstrip("/") if link_type else None
@@ -109,6 +115,22 @@ class Admin(MethodView):
 
             )
         return redirect(url_for("admin_links",link_type="add_contenstants"))
+
+    def clear_polls(self):
+        users = dl.User().get_all_user()
+        candidates = dl.ElectoralCandidates().get_all_candidates()
+
+        if users and candidates :
+            for user in users:
+                user.hasVoted = False
+            for candidate in candidates:
+                candidate.votes = 0
+
+            db.session.commit()
+            flash("All polls have been reset")
+
+
+        return redirect(url_for("admin_base"))
 
 
     def logout(self):

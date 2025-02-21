@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}RESULTS{% endblock %}
+{% block content %}
+
+<style>
+    body {
+        background-color: #121212;
+        color: white;
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+    .table-container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 20px auto;
+        background: #1e1e1e;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+        overflow-x: auto; /* Enable horizontal scrolling */
+    }
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto; /* Ensures table scrolls on small screens */
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        min-width: 600px; /* Prevents too-small tables */
+    }
+    th, td {
+        padding: 12px;
+        border: 1px solid white;
+        text-align: left;
+        white-space: nowrap; /* Prevents text wrapping in small columns */
+    }
+    th {
+        background-color: #0d6efd;
+    }
+    h2 {
+        color: #0d6efd;
+    }
+    .print-btn {
+        background-color: #0d6efd;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+    .print-btn:hover {
+        background-color: #0b5ed7;
+    }
+
+    /* Hide everything except the table when printing */
+    @media print {
+        body {
+            background: white;
+            color: black;
+        }
+        .print-btn {
+            display: none;
+        }
+        .table-container {
+            box-shadow: none;
+            border: 1px solid black;
+        }
+        th {
+            background-color: #ddd !important;
+            color: black !important;
+        }
+    }
+
+    /* Make the table scrollable on small screens */
+    @media (max-width: 768px) {
+        .table-container {
+            width: 95%;
+            padding: 10px;
+        }
+        th, td {
+            font-size: 14px;
+            padding: 8px;
+        }
+    }
+</style>
+
+<h1 class="text-white">Voting Results</h1>
+
+<!-- PRINT BUTTON -->
+<button class="print-btn" onclick="window.print()">Print Results</button>
+
+{% set grouped_candidates = {} %}
+{% for candidate in candidates %}
+    {% set _ = grouped_candidates.setdefault(candidate.position, []).append(candidate) %}
+{% endfor %}
+
+{% for position, contenders in grouped_candidates.items() %}
+    <div class="table-container">
+        <h2>{{ position }}</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Registration Number</th>
+                        <th>Votes</th>
+                    </tr>
+                </thead>
+                <tbody class="text-white">
+                    {% for candidate in contenders %}
+                        <tr data-reg="{{ candidate.reg_number }}">
+                            <td>{{ candidate.full_name }}</td>
+                            <td>{{ candidate.reg_number }}</td>
+                            <td class="votes">{{ candidate.votes }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endfor %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function fetchVotes() {
+        $.getJSON("/votes", function(data) {
+            data.forEach(candidate => {
+                let row = $(`tr[data-reg="${candidate.reg_number}"]`);
+                if (row.length) {
+                    row.find(".votes").text(candidate.votes);
+                }
+            });
+        });
+    }
+
+    setInterval(fetchVotes, 10000);
+</script>
+
+{% endblock %}
